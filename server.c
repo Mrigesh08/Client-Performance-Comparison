@@ -11,8 +11,15 @@
 #include <signal.h>
 
 #define MAXPENDING 5
-#define BUFSIZE 1024
+#define BUFSIZE 1000
 #define PORT 3000
+
+void capitalize(char * buf, int x){
+	for(int i=0;i<x;i++){
+		buf[i] = (char)(buf[i] -32);
+	}
+	// return buf;
+}
 
 int main(){
 
@@ -64,7 +71,7 @@ int main(){
 		//accept call for all concurrent CLIENTS
 		int clientSocket = accept (serverSocket, (struct sockaddr*) &clientAddress, &clientLength);
 		if(clientSocket < 0){
-			printf ("Error in accept\n");
+			// printf ("Error in accept\n");
 			exit(1);
 		}
 		printf("connection established with a client\n");
@@ -82,10 +89,17 @@ int main(){
 			while(1){
 				memset(buffer ,0, sizeof(buffer));
 				int x=recv(clientSocket,buffer, sizeof(buffer),0);
+				if(x==0){
+					break;
+				}
+				capitalize(buffer,x);
 				printf("%s\n", buffer);
+				int y =send(clientSocket, buffer, sizeof(buffer),0);
+
 			}
 			close(clientSocket);
 		}
+		close(clientSocket);
 		
 	}
 	close(serverSocket);

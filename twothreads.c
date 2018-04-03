@@ -11,37 +11,51 @@
 #include <sys/shm.h>
 #include <pthread.h>
 
-#define BUFSIZE 1024
+#define BUFSIZE 1000
 #define PORT 3000
 #define MAXLOOP 10
 
+
 long long int i=0;
+long long int i2=0;
 long long int j=100000000; 
-char buf[BUFSIZE];
+char sendbuf[BUFSIZE];
+char recvbuf[BUFSIZE];
+FILE * fp;
 int sock;
-// creating mutex lock;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void * func(){
-	while(i<j){
-		int g=send(sock,buf,sizeof(buf),0);
-		if(g==1024){ 
-			pthread_mutex_lock(&mutex);
-			printf("%lld : Number of bytes sent till now = %lld\n",(long long int)pthread_self(),i );
-			i = i + 1024;
-			pthread_mutex_unlock(&mutex);
-		}	
+
+	// while(fgets(sendbuf,1000,fp)!=NULL && feof(fp)==0){
+	while(fread(sendbuf,1,1000,fp)>0){
+		write(sock, sendbuf, sizeof(sendbuf));
+		i+=1000;
+		printf("SENT : %lld bytes till now :%s\n",i, sendbuf);
 	}
-	
+	shutdown(sock,SHUT_WR);
+	printf("\n\n\n\n\n\n\n\n Sending Thread close \n\n\n\n\n\n\n\n\n\n");
+	return (NULL);
 }
+
+void receive(){
+	pthread_t tid;
+	pthread_create(&tid, NULL, func, NULL);
+	
+	while(read(sock, recvbuf,sizeof(recvbuf)) > 0	){
+		i2+=1000;
+		printf("RECV : %lld bytes till now :%s\n", i2,recvbuf);
+	}
+
+	pthread_join(tid,NULL);
+
+}
+
 
 int main(){
 	
 	int n=0;
-	
-	memset(buf, 65, sizeof(buf)); // set it to any random value
-	buf[1023]='\0';
-	fd_set rfds,wfds;
+	fp=fopen("thetextsmall","r");
+	 // set it to any random value
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;
 	double requestTime, programTime;
@@ -73,20 +87,10 @@ int main(){
 	}
 	printf("Connection Established\n");
 	
-	
-	// Creating Threads;
-	pthread_t tidA, tidB;
-	pthread_create(&tidA, NULL, &func, NULL);
-	pthread_create(&tidB, NULL, &func, NULL);
-
-
-
-
-	pthread_join(tidA, NULL);
-	pthread_join(tidB, NULL);
+	receive();
 
 	close(sock);
-
+	fclose(fp);
 	programEnd = clock();
 	programTime = (double)( programEnd -programStart )/(double)CLOCKS_PER_SEC;
 	
