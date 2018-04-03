@@ -10,7 +10,7 @@
 #include <sys/wait.h>
 
 #define BUFSIZE 1024
-#define PORT 4000
+#define PORT 3000
 
 long long int i=0;
 long long int i2=0;

@@ -12,7 +12,7 @@
 
 #define MAXPENDING 5
 #define BUFSIZE 1000
-#define PORT 4000
+#define PORT 3000
 
 void capitalize(char * buf, int x){
 	for(int i=0;i<x;i++){
