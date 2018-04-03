@@ -33,7 +33,7 @@ void * func(){
 		printf("SENT : %lld bytes till now :%s\n",i, sendbuf);
 	}
 	shutdown(sock,SHUT_WR);
-	printf("\n\n\n\n\n\n\n\n Sending Thread close \n\n\n\n\n\n\n\n\n\n");
+	printf("\n\n\n\n\n\n\n\n Sending Thread closed \n\n\n\n\n\n\n\n\n\n");
 	return (NULL);
 }
 

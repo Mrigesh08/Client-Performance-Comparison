@@ -12,7 +12,7 @@
 
 #define MAXPENDING 5
 #define BUFSIZE 1000
-#define PORT 3000
+#define PORT 4000
 
 void capitalize(char * buf, int x){
 	for(int i=0;i<x;i++){
@@ -98,6 +98,8 @@ int main(){
 
 			}
 			close(clientSocket);
+			printf("\n\nCLOSING CONNECTION\n\n");
+			break;
 		}
 		close(clientSocket);
 		
