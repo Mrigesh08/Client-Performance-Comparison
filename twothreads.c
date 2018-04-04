@@ -54,7 +54,7 @@ void receive(){
 int main(){
 	
 	int n=0;
-	fp=fopen("thetextsmall","r");
+	fp=fopen("thetext","r");
 	 // set it to any random value
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;

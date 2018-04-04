@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #define bufsize 1024
 
-long long int filesize = 10000000; // 0.01GB
+long long int filesize = 1000000000; // 1GB
 
 void createFile(char * fname){
 	FILE * f=fopen(fname,"w");
@@ -31,6 +31,6 @@ void createFile(char * fname){
 int main(int argc, char const *argv[])
 {
 	
-	createFile("thetextsmall");
+	createFile("thetext");
 	return 0;
 }

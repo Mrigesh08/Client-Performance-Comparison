@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define BUFSIZE 1024
+#define BUFSIZE 1000
 #define PORT 3000
 
 long long int i=0;
@@ -24,7 +24,7 @@ int sock;
 int main(){
 	
 	int n=0;
-	fp=fopen("thetextsmall","r");
+	fp=fopen("thetext","r");
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;
 	double requestTime, programTime;

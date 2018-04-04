@@ -16,7 +16,7 @@ FILE * fp;
 int main(){
 
 	int n=0;
-	fp=fopen("thetextsmall","r");
+	fp=fopen("thetext","r");
 	fd_set rfds,wfds;
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;

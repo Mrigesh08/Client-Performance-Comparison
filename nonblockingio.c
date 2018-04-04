@@ -158,7 +158,7 @@ void func(){
 int main(){
 
 	int n=0;
-	fp=fopen("thetextsmall","r");
+	fp=fopen("thetext","r");
 	// fd_set rfds,wfds;
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;
@@ -197,7 +197,7 @@ int main(){
 	programTime = (double)( programEnd -programStart )/(double)CLOCKS_PER_SEC;
 	
 	printf("Time taken by the program = %f\n",programTime );
-	printf("Time taken per request = %f\n",totalRequestTime/(double)numberOfRequests );
+	// printf("Time taken per request = %f\n",totalRequestTime/(double)numberOfRequests );
 	printf("Throughtput =%f\n",(double)i/programTime);
 	
 

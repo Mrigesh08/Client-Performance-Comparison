@@ -17,7 +17,7 @@ long long int i=0;
 long long int i2=0;
 FILE * fp;
 // int sock;
-int maxConns=5;
+int maxConns=1;
 int nConns=0;
 int nLeftToConnect;
 int nsecs=2;
@@ -144,7 +144,7 @@ void * func(void * arg){
 		if(FD_ISSET(sock, &wfds) && (n > 0)){
 			// printf("WRITING TO SOCKET\n");
 			if((nwritten = write(sock,tooptr,n) )< 0){
-				if(errno != EWOULDBLOCK){ printf("write error 1\n");  exit(1);}
+				if(errno != EWOULDBLOCK){ printf("write error 1\n");close(sock);  return NULL;}
 			}
 			else{
 				i+=nwritten;
@@ -253,7 +253,7 @@ void estasblishMultipleConns(struct sockaddr_in serverAddr){
 int main(){
 
 	int n=0;
-	fp=fopen("thetextsmall","r");
+	fp=fopen("thetext","r");
 	// fd_set rfds,wfds;
 	nLeftToConnect=maxConns;
 	clock_t programStart, programEnd;
