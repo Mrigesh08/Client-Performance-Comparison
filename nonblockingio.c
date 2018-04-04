@@ -9,7 +9,7 @@
 #include <fcntl.h>
 
 #define BUFSIZE 1000
-#define PORT 3000
+#define PORT 4000
 // char recvbuf[BUFSIZE];
 // char sendbuf[BUFSIZE];
 long long int i=0;
@@ -24,7 +24,7 @@ int max(int a, int b){
 void func(){
 	// declare variables
 	int maxfd, val, stdineof;
-	int n, nwritten;
+	int n, nwritten ,n2;
 	fd_set rfds, wfds;
 	char to[BUFSIZE], from[BUFSIZE];
 	char *toiptr, *tooptr, *friptr, *froptr;
@@ -67,81 +67,88 @@ void func(){
 				if(errno != EWOULDBLOCK){ perror("read");  exit(1);}
 			}
 			else if(n==0){
-				printf("\nALL DATA SENT\n" );
+				printf("\n\nALL DATA SENT\n\n" );
 				stdineof =1;
 				if(tooptr == toiptr)
 					shutdown(sock, SHUT_WR); // shutdown the write end of the socket
 			}
 			else{
 				toiptr+=n;
-				printf("%d Bytes read from the file\n", n );
+				// printf("%d Bytes read from the file\n", n );
 				FD_SET(sock,&wfds);
 			}
 		}
-
+		
 
 		// Writing to Socket
 		if(FD_ISSET(sock, &wfds) && (n > 0)){
-			printf("WRITING TO SOCKET\n");
+			// printf("WRITING TO SOCKET\n");
 			if((nwritten = write(sock,tooptr,n) )< 0){
 				if(errno != EWOULDBLOCK){ printf("write error 1\n");  exit(1);}
 			}
 			else{
 				i+=nwritten;
-				printf("SENT : %lld Total bytes sent till now. %s\n",i,tooptr);
+				// printf("SENT : %lld Total bytes sent till now. %s\n",i,tooptr);
 				tooptr+=nwritten;
 				if(tooptr == toiptr){
-					printf("RESETTING\n");
+					// printf("RESETTING\n");
 					toiptr = tooptr = to;
 					if(stdineof)
 						shutdown(sock,SHUT_WR);
 				}
+				else{
+					n=n-nwritten; // so the next time, only the remaining n characters will be written
+				}
 			}
 		}
-		else{
-			printf("SOCKET NOT WRITABLE\n");
-			printf("%d\n",FD_ISSET(sock, &wfds) );
-			printf("%d\n",n);
-		}
+		// else{
+		// 	printf("SOCKET NOT WRITABLE\n");
+		// 	printf("%d\n",FD_ISSET(sock, &wfds) );
+		// 	printf("%d\n",n);
+		// }
 
-
+		
 		// Reading from the socket
 		if(FD_ISSET(sock, &rfds)){
-			printf("READING THE REPLY FROM THE SERVER\n");
-			if((n=read(sock , friptr , &from[BUFSIZE] - friptr)) < 0){
+			// printf("READING THE REPLY FROM THE SERVER\n");
+			if((n2=read(sock , friptr , &from[BUFSIZE] - friptr)) < 0){
 				if(errno != EWOULDBLOCK){ perror("read");  exit(1);}
 			}
-			else if(n==0){
-				printf("\nALL DATA SENT\n" );
+			else if(n2==0){
+				printf("\n\nALL DATA READ\n\n" );
 				if(stdineof ==1) return ;
 				else printf("ERROR : server terminated prematurely.\n");
 				if(tooptr == toiptr)
 					shutdown(sock, SHUT_WR); // shutdown the write end of the socket
 			}
 			else{
-				friptr+=n;
-				printf("%d Bytes read from the socket\n", n );
+				friptr+=n2;
+				// printf("%d Bytes read from the socket\n", n2 );
 				FD_SET(STDOUT_FILENO, &wfds); 
 			}
 		}
 
-
+		
 		// Writing server reply to STDOUT
-		if(FD_ISSET(STDOUT_FILENO, &wfds) && n > 0){
-			printf("WRITING TO STDOUT\n");
-			if((nwritten = write(STDOUT_FILENO,froptr,n) )< 0){
+		if(FD_ISSET(STDOUT_FILENO, &wfds) && n2 > 0){
+			// printf("WRITING TO STDOUT\n");
+			if((nwritten = write(STDOUT_FILENO,froptr,n2) )< 0){
 				if(errno != EWOULDBLOCK){ printf("write error 2\n");  exit(1);}
 			}
 			else{
 				i2+=nwritten;
-				printf("\nRECV : %lld Total bytes received till now.\n",i2);
+				// printf("\nRECV : %lld Total bytes received till now.\n",i2);
 				froptr+=nwritten;
 				if(froptr == friptr){
-					printf("RESETTING2\n");
+					// printf("RESETTING2\n");
 					friptr = froptr = from;
 				}
+				else{
+					n2=n2-nwritten;
+				}
 			}
-		}		
+		}
+		
 
 	}
 }
@@ -182,8 +189,6 @@ int main(){
 		exit (0);
 	}
 	printf ("Connection Established\n");
-
-	long long int i=0;
 	
 	func();
 	close(sock);
