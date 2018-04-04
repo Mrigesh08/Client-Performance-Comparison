@@ -3,6 +3,7 @@ all:
 	gcc blockingio.c -o blockingio
 	gcc nonblockingio.c -o nonblockingio
 	gcc nonblockingconnect.c -lpthread -o nonblockingconnect
+	gcc multiplethreads.c -lpthread -o multiplethreads
 	gcc server2.c -o server2
 	gcc twoprocesses.c -o twoprocesses
 	gcc server.c -o server

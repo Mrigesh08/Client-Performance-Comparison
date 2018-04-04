@@ -217,6 +217,9 @@ void * func(void * arg){
 void estasblishMultipleConns(struct sockaddr_in serverAddr){
 	pthread_t tid;
 	int sock;
+	pthread_t arr[maxConns];
+	int r=0;
+	memset(arr,0,sizeof(arr));
 	while(nLeftToConnect > 0){
 		printf("nLeftToConnect = %d\n",nLeftToConnect );
 		sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -232,10 +235,15 @@ void estasblishMultipleConns(struct sockaddr_in serverAddr){
 			*arg=sock;
 			
 			pthread_create(&tid, NULL, func,(void *)arg);
-			pthread_join(tid,NULL);
+			arr[r]=tid;
+			r++;
 			// join it to main
 		}
 		nLeftToConnect--;
+	}
+	for(int i=0;i<r;i++){
+		printf("JOINING %lld\n",(long long int)arr[i]);
+		pthread_join(arr[i],NULL);
 	}
 	printf("%d Connections established\n",nConns );
 }
