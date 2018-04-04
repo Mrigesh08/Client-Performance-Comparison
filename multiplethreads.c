@@ -32,6 +32,7 @@ void * func(void * arg	){
 	char recvbuf[BUFSIZE];
 
 	while((n=recv(sock,recvbuf, sizeof(recvbuf),0))>0){
+		i+=n;
 		int k=write(STDOUT_FILENO, recvbuf, sizeof(recvbuf));
 		if(k<n){
 			printf("WRITE ERROR\n"); exit(1);
