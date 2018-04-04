@@ -9,7 +9,7 @@
 #include <fcntl.h>
 
 #define BUFSIZE 1000
-#define PORT 4000
+#define PORT 3000
 // char recvbuf[BUFSIZE];
 // char sendbuf[BUFSIZE];
 long long int i=0;

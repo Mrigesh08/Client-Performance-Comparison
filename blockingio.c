@@ -7,16 +7,16 @@
 #include <errno.h>
 #include <time.h>
 
-#define BUFSIZE 1024
+#define BUFSIZE 1000
 #define PORT 3000
-
+char recvbuf[BUFSIZE];
+char sendbuf[BUFSIZE];
+FILE * fp;
 
 int main(){
 
 	int n=0;
-	char buf[BUFSIZE];
-	memset(buf, 65, sizeof(buf)); // set it to any random value
-	buf[1023]='\0';
+	fp=fopen("thetextsmall","r");
 	fd_set rfds,wfds;
 	clock_t programStart, programEnd;
 	clock_t requestStart, requestEnd;
@@ -49,28 +49,45 @@ int main(){
 	printf ("Connection Established\n");
 
 	long long int i=0;
-	long long int j=1000000000;
-	while(i<j){
+	// long long int j=1000000000;
+	while(1){
 		printf("i=%lld \n",i );
 		FD_SET(sock, &wfds);
+		FD_SET(sock, &rfds);
 		int x=select(sock+1,NULL, &wfds, NULL, NULL);
 		// send
 		if(FD_ISSET(sock,&wfds)){
 			requestStart = clock();
-			int g=send(sock,buf,sizeof(buf),0);
-			requestEnd = clock();
-			requestTime=(double)(requestEnd-requestStart)/(double)CLOCKS_PER_SEC;
-			printf("RequestTime = %f\n",requestTime );
-			totalRequestTime+=requestTime;
-			numberOfRequests++;
-			if(g==1024){
-				i+=1024;
+			if(fread(sendbuf,1,1000,fp)>0){
+				int g=send(sock,sendbuf,sizeof(sendbuf),0);
+				if(g==1000){
+					i+=1000;
+				}
+				else{
+					perror("send");
+					exit(1);
+				}
 			}
 			else{
-				perror("send");
-				exit(1);
+				shutdown(sock, SHUT_WR);
+				break;
 			}
+			requestEnd = clock();
+			requestTime=(double)(requestEnd-requestStart)/(double)CLOCKS_PER_SEC;
+			// printf("RequestTime = %f\n",requestTime );
+			printf("SENT : %s \n",sendbuf );
+			totalRequestTime+=requestTime;
+			numberOfRequests++;
+			
 		}
+		if(FD_ISSET(sock,&rfds)){
+			int g=recv(sock,recvbuf, sizeof(recvbuf),0 );
+			if(g<=0){
+				break;
+			}
+			printf("RECV : %s\n", recvbuf);
+		}
+		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 	}
 	

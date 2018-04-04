@@ -14,9 +14,9 @@ void createFile(char * fname){
 		for(int i=0;i<bufsize;i++){	
 			r=rand();
 			c=(char) (r%26 + 97);
-			if(i%(bufsize-1)==0){
-				c='\n';
-			}
+			// if(i%(bufsize-1)==0){
+			// 	c='\n';
+			// }
 			buf[i]=c;
 		}	
 		fprintf(f,"%s",buf);
