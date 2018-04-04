@@ -92,8 +92,8 @@ void * func(void * arg){
 	// make socket and IO non blocking
 	val = fcntl(sock, F_GETFL, 0);
 	fcntl(sock, F_SETFL, val | O_NONBLOCK);
-	val = fcntl(fileno(fp),F_GETFL,0);
-	fcntl(fileno(fp), F_SETFL, val | O_NONBLOCK);
+	// val = fcntl(fileno(fp),F_GETFL,0);
+	// fcntl(fileno(fp), F_SETFL, val | O_NONBLOCK);
 	val = fcntl(STDOUT_FILENO,F_GETFL,0);
 	fcntl(STDOUT_FILENO, F_SETFL, val | O_NONBLOCK);
 
@@ -101,71 +101,24 @@ void * func(void * arg){
 	toiptr = tooptr = to;
 	froptr = friptr = from;
 	stdineof =0 ;
-	maxfd = max(max(STDOUT_FILENO, fileno(fp)),sock);
+	maxfd = max(STDOUT_FILENO,sock);
 	
 
 	while(1){
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
-		if(stdineof == 0 && (toiptr < &to[BUFSIZE]))
-			FD_SET(fileno(fp), &rfds);
+		// if(stdineof == 0 && (toiptr < &to[BUFSIZE]))
+		// 	FD_SET(fileno(fp), &rfds);
 		if(friptr < &from[BUFSIZE])
 			FD_SET(sock, &rfds);
-		if(tooptr != toiptr)
-			FD_SET(sock, &wfds);
+		// if(tooptr != toiptr)
+		// 	FD_SET(sock, &wfds);
 		if(froptr != friptr)
 			FD_SET(STDOUT_FILENO, &wfds);
 
 
 		int g=select(maxfd+1, &rfds, &wfds, NULL, NULL);
 		if(g==-1){perror("select"); exit(1); }
-
-
-		// Reading from file
-		if(FD_ISSET(fileno(fp), &rfds)){
-			if((n=read(fileno(fp) , toiptr , &to[BUFSIZE] - toiptr)) < 0){
-				if(errno != EWOULDBLOCK){ perror("read");  exit(1);}
-			}
-			else if(n==0){
-				printf("\n\nALL DATA SENT\n\n" );
-				stdineof =1;
-				if(tooptr == toiptr)
-					shutdown(sock, SHUT_WR); // shutdown the write end of the socket
-			}
-			else{
-				toiptr+=n;
-				// printf("%d Bytes read from the file\n", n );
-				FD_SET(sock,&wfds);
-			}
-		}
-		
-
-		// Writing to Socket
-		if(FD_ISSET(sock, &wfds) && (n > 0)){
-			// printf("WRITING TO SOCKET\n");
-			if((nwritten = write(sock,tooptr,n) )< 0){
-				if(errno != EWOULDBLOCK){ printf("write error 1\n");close(sock);  return NULL;}
-			}
-			else{
-				i+=nwritten;
-				// printf("SENT : %lld Total bytes sent till now. %s\n",i,tooptr);
-				tooptr+=nwritten;
-				if(tooptr == toiptr){
-					// printf("RESETTING\n");
-					toiptr = tooptr = to;
-					if(stdineof)
-						shutdown(sock,SHUT_WR);
-				}
-				else{
-					n=n-nwritten; // so the next time, only the remaining n characters will be written
-				}
-			}
-		}
-		// else{
-		// 	printf("SOCKET NOT WRITABLE\n");
-		// 	printf("%d\n",FD_ISSET(sock, &wfds) );
-		// 	printf("%d\n",n);
-		// }
 
 		
 		// Reading from the socket
@@ -176,13 +129,13 @@ void * func(void * arg){
 			}
 			else if(n2==0){
 				printf("\n\nALL DATA READ\n\n" );
-				if(stdineof ==1){ close(sock); return NULL ;}
-				else printf("ERROR : server terminated prematurely.\n");
+				close(sock); return NULL ;
 				if(tooptr == toiptr)
 					shutdown(sock, SHUT_WR); // shutdown the write end of the socket
 			}
 			else{
 				friptr+=n2;
+				i+=n2;
 				// printf("%d Bytes read from the socket\n", n2 );
 				FD_SET(STDOUT_FILENO, &wfds); 
 			}
@@ -253,7 +206,7 @@ void estasblishMultipleConns(struct sockaddr_in serverAddr){
 int main(){
 
 	int n=0;
-	fp=fopen("thetext","r");
+	// fp=fopen("thetext","r");
 	// fd_set rfds,wfds;
 	nLeftToConnect=maxConns;
 	clock_t programStart, programEnd;
