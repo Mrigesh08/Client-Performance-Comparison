@@ -10,6 +10,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #define BUFSIZE 1000
 #define PORT 3000
@@ -23,13 +24,14 @@ char sendbuf[BUFSIZE];
 char recvbuf[BUFSIZE];
 FILE * fp;
 int sock;
-
+long long int numberOfRequests=0;
 void * func(){
 
 	// while(fgets(sendbuf,1000,fp)!=NULL && feof(fp)==0){
 	while(fread(sendbuf,1,1000,fp)>0){
 		write(sock, sendbuf, sizeof(sendbuf));
 		i+=1000;
+		numberOfRequests++;
 		printf("SENT : %lld bytes till now :%s\n",i, sendbuf);
 	}
 	shutdown(sock,SHUT_WR);
@@ -56,14 +58,11 @@ int main(){
 	int n=0;
 	fp=fopen("thetext","r");
 	 // set it to any random value
-	clock_t programStart, programEnd;
-	clock_t requestStart, requestEnd;
-	double requestTime, programTime;
-	double totalRequestTime=0;
-	long long int numberOfRequests=0;	
-
-	
-	programStart = clock();
+	// clock_t programStart, programEnd;
+	// clock_t requestStart, requestEnd;
+	struct timeval tv1,tv2;
+	double programTime;
+	// long long int numberOfRequests=0;		
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0){
@@ -87,15 +86,18 @@ int main(){
 	}
 	printf("Connection Established\n");
 	
+	// programStart = clock();
+	gettimeofday(&tv1,NULL);
 	receive();
 
 	close(sock);
 	fclose(fp);
-	programEnd = clock();
-	programTime = (double)( programEnd -programStart )/(double)CLOCKS_PER_SEC;
+	// programEnd = clock();
+	gettimeofday(&tv2,NULL);
+	programTime=(double)(tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec)/1000000;
 	
 	printf("Time taken by the program = %f\n",programTime );
-	// printf("Time taken per request = %f\n",totalRequestTime/(double)numberOfRequests );
+	printf("Time taken per request = %f\n",programTime/(double)numberOfRequests );
 	printf("Throughtput =%f\n",(double)i/programTime);
 	
 
