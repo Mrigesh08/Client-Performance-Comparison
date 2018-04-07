@@ -8,6 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #define BUFSIZE 1000
 #define PORT 3000
@@ -21,6 +22,7 @@ int maxConns=5;
 int nConns=0;
 int nLeftToConnect;
 int nsecs=2;
+long long int numberOfRequests=0;
 
 int max(int a, int b){
 	return a>b?a:b;
@@ -33,6 +35,7 @@ void * func(void * arg	){
 
 	while((n=recv(sock,recvbuf, sizeof(recvbuf),0))>0){
 		i+=n;
+		numberOfRequests++;
 		int k=write(STDOUT_FILENO, recvbuf, sizeof(recvbuf));
 		if(k<n){
 			printf("WRITE ERROR\n"); exit(1);
@@ -84,13 +87,11 @@ int main(){
 	// fp=fopen("thetextsmall","r");
 	// fd_set rfds,wfds;
 	nLeftToConnect=maxConns;
-	clock_t programStart, programEnd;
-	clock_t requestStart, requestEnd;
-	double requestTime, programTime;
-	double totalRequestTime=0;
-	long long int numberOfRequests=0;	
-
-	programStart = clock();
+	// clock_t programStart, programEnd;
+	// clock_t requestStart, requestEnd;
+	struct timeval tv1,tv2;
+	double programTime;
+		
 
 	// sock = socket(AF_INET, SOCK_STREAM, 0);
 	
@@ -113,14 +114,15 @@ int main(){
 	// printf ("Connection Established\n");
 		
 	// nonBlockingConnect(serverAddr);
+	gettimeofday(&tv1, NULL);
 	estasblishMultipleConns(serverAddr);
+	gettimeofday(&tv2, NULL);
 	// func();
 
-	programEnd = clock();
-	programTime = (double)( programEnd -programStart )/(double)CLOCKS_PER_SEC;
+	programTime=(double)(tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec)/1000000;
 	
 	printf("Time taken by the program = %f\n",programTime );
-	printf("Time taken per request = %f\n",totalRequestTime/(double)numberOfRequests );
+	printf("Time taken per request = %f\n",programTime/(double)numberOfRequests );
 	printf("Throughtput =%f\n",(double)i/programTime);
 	
 

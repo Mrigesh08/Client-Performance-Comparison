@@ -28,7 +28,7 @@ int main(){
 	struct sockaddr_in serverAddress, clientAddress;
 	int bind_add;
 	int clientLength;
-	FILE * fp=fopen("thetextsmall","r");
+	FILE * fp=fopen("thetext","r");
 	int fd=fileno(fp);
 	long long int i=0;
 

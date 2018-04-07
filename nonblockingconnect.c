@@ -8,6 +8,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #define BUFSIZE 1000
 #define PORT 3000
@@ -17,10 +18,11 @@ long long int i=0;
 long long int i2=0;
 FILE * fp;
 // int sock;
-int maxConns=1;
+int maxConns=15;
 int nConns=0;
 int nLeftToConnect;
 int nsecs=2;
+long long int numberOfRequests=0;
 
 int max(int a, int b){
 	return a>b?a:b;
@@ -136,6 +138,7 @@ void * func(void * arg){
 			else{
 				friptr+=n2;
 				i+=n2;
+				numberOfRequests++;
 				// printf("%d Bytes read from the socket\n", n2 );
 				FD_SET(STDOUT_FILENO, &wfds); 
 			}
@@ -183,6 +186,7 @@ void estasblishMultipleConns(struct sockaddr_in serverAddr){
 		if(nonBlockingConnect(sock,serverAddr)==0){
 			printf("New connection established\n");
 			nConns++;
+			// send the required value for lseek;
 			// spawn a thread to handle this new connection.
 			int * arg=(int *)malloc(sizeof(int));
 			*arg=sock;
@@ -209,13 +213,11 @@ int main(){
 	// fp=fopen("thetext","r");
 	// fd_set rfds,wfds;
 	nLeftToConnect=maxConns;
-	clock_t programStart, programEnd;
-	clock_t requestStart, requestEnd;
-	double requestTime, programTime;
-	double totalRequestTime=0;
-	long long int numberOfRequests=0;	
-
-	programStart = clock();
+	// clock_t programStart, programEnd;
+	// clock_t requestStart, requestEnd;
+	struct timeval tv1,tv2;
+	double programTime;
+		
 
 	// sock = socket(AF_INET, SOCK_STREAM, 0);
 	
@@ -238,14 +240,15 @@ int main(){
 	// printf ("Connection Established\n");
 		
 	// nonBlockingConnect(serverAddr);
+	gettimeofday(&tv1, NULL);
 	estasblishMultipleConns(serverAddr);
+	gettimeofday(&tv2, NULL);
 	// func();
 
-	programEnd = clock();
-	programTime = (double)( programEnd -programStart )/(double)CLOCKS_PER_SEC;
+	programTime=(double)(tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec)/1000000;
 	
 	printf("Time taken by the program = %f\n",programTime );
-	printf("Time taken per request = %f\n",totalRequestTime/(double)numberOfRequests );
+	printf("Time taken per request = %f\n",programTime/(double)numberOfRequests );
 	printf("Throughtput =%f\n",(double)i/programTime);
 	
 
